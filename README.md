@@ -10,7 +10,7 @@
 ## 설치
 
 ```bash
-pip install .
+pip install git+URL
 ```
 
 ## 사용법

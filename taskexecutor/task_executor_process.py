@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 # 큐에 이 값을 넣으면 워커가 루프를 빠져나온다.
 # 워커 1개당 1개가 필요하다 (신호 하나는 워커 하나만 꺼내 간다).
-SHUTDOWN = None
+SHUTDOWN = "멈춰!"
 
 # ------------------------
 # Worker Process
