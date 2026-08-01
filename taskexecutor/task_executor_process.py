@@ -1,7 +1,12 @@
 import logging
-from multiprocessing import Process
-from multiprocessing.queues import Queue
+import traceback
 
+from multiprocessing.queues import Queue # 타입 힌트용
+from multiprocessing import Queue
+from multiprocessing import Process
+
+
+from .exception import FuncExecutorException
 # class Task:
 #     def __init__(self, works):
 #         self._works = works
@@ -14,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 # 큐에 이 값을 넣으면 워커가 루프를 빠져나온다.
 # 워커 1개당 1개가 필요하다 (신호 하나는 워커 하나만 꺼내 간다).
-SHUTDOWN = "멈춰!"
+SHUTDOWN = None
 
 # ------------------------
 # Worker Process
@@ -24,6 +29,7 @@ class WorkProcess(Process):
     def __init__(self, task_queue: Queue):
         super().__init__()
         self.task_queue = task_queue
+        self.result_queue = Queue()
 
     def stop(self):
         """워커에게 종료를 요청한다.
@@ -52,9 +58,15 @@ class WorkProcess(Process):
                 break
 
             try:
-                task()
+                result = task()
+                self.result_queue.put(result)
             except Exception:
                 # 작업 하나가 실패해도 워커는 계속 살아있어야 한다.
                 logger.exception("Task Failed")
+                error = FuncExecutorException(
+                    getattr(task, "__name__", repr(task)),
+                    traceback.format_exc(),
+                self.result_queue(error)
+    )
             else:
                 logger.info("Task Finished")
